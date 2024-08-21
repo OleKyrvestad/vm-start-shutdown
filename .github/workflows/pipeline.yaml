@@ -1,0 +1,57 @@
+name: Manage VM uptime
+
+on:
+  # Schedule 1: Start VMs every day at 7:30 AM Norwegian time (CET/CEST)
+  schedule:
+    - cron: '30 6 * * *'  # 6:30 AM UTC = 7:30 AM CET/CEST
+  # Schedule 2: Stop VMs every day at 10:00 PM Norwegian time (CET/CEST)
+    - cron: '00 21 * * *'  # 9:00 PM UTC = 10:00 PM CET/CEST
+
+  # Manual trigger for both start and stop jobs
+  workflow_dispatch:
+    inputs:
+      vmPrefix:
+        description: 'VM name prefix to manage'
+        required: true
+        default: 'vm-dev'
+
+jobs:
+  start-vms:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' && contains(github.event.schedule, '30 6')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Azure CLI
+        uses: azure/CLI@v1
+
+      - name: Start VMs with Prefix
+        run: |
+          chmod +x ./your-script.sh  # Ensure your script is executable
+          ./vm-start.sh ${{ github.event.inputs.vmPrefix }}
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ env.AZURE_SUBSCRIPTION_ID }}
+          AZURE_CLIENT_ID: ${{ env.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ env.AZURE_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+  stop-vms:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' && contains(github.event.schedule, '00 21')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Azure CLI
+        uses: azure/CLI@v1
+
+      - name: Stop VMs with Prefix
+        run: |
+          chmod +x ./shutdown-script.sh  # Ensure your shutdown script is executable
+          ./vm-shutdown.sh ${{ github.event.inputs.vmPrefix }}
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
