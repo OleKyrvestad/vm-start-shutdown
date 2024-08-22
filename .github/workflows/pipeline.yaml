@@ -15,10 +15,10 @@ on:
         required: true
         default: 'dev'
       override_start:
-        description: 'Override to force start of VMs'
+        description: Manual run, Start VM´s? (true/false)'
         default: 'false'
       override_shutdown:
-        description: 'Override to force shutdown of VMs'
+        description: 'Manual run, shutdown VM´s? (true/false)'
         default: 'false'
 
 env:
