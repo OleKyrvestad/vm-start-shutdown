@@ -1,11 +1,11 @@
 name: Manage VM uptime
 
 on:
-  # Schedule 1: Start VMs every day at 7:30 AM Norwegian time (CET/CEST)
+  # Schedule 1: Start VMs every day at 07:30 AM
   schedule:
-    - cron: '30 6 * * *'  # 6:30 AM UTC = 7:30 AM CET/CEST
+    - cron: '30 5 * * *'  # 07:30 AM CEST (UTC+2)  (Daylight Saving Time)
   # Schedule 2: Stop VMs every day at 10:00 PM Norwegian time (CET/CEST)
-    - cron: '00 21 * * *'  # 9:00 PM UTC = 10:00 PM CET/CEST
+    - cron: '00 22 * * *'  # 23:00 PM CEST (UTC+2)  (Daylight Saving Time)
 
   # Manual trigger for both start and stop jobs
   workflow_dispatch:
