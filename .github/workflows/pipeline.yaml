@@ -15,11 +15,19 @@ on:
         required: true
         default: 'dev'
       override_start:
-        description: Manual run, Start VM´s? (true/false)'
+        description: Manual run, start VM´s? (false/true)'
         default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
       override_shutdown:
-        description: 'Manual run, shutdown VM´s? (true/false)'
-        default: 'false'
+          description: 'Manual run, shutdown VM´s? (false/true)'
+          default: 'false'
+          type: choice
+          options:
+            - 'true'
+            - 'false'
 
 env:
   AZURE_CLIENT_ID: ${{ vars.CLIENT_ID }}
