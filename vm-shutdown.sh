@@ -3,8 +3,8 @@
 vmPrefix=$1  # Accept vmPrefix as a command-line argument
 
 # Get the list of VMs where the name starts with "vm-dev"
-VM_IDS=$(az vm list --query "[?starts_with(name, '$vmPrefix')].id" -o tsv)
-VM_NAMES=$(az vm list --query "[?starts_with(name, '$vmPrefix')].name" -o tsv)
+VM_IDS=$(az vm list --query "[?contains(name, '$vmPrefix')].id" -o tsv)
+VM_NAMES=$(az vm list --query "[?contains(name, '$vmPrefix')].name" -o tsv)
 
 # List VM´s 
 echo "List of VMs to process"
