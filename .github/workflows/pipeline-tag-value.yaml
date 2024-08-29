@@ -1,4 +1,4 @@
-name: Manage VM uptime
+name: TAG - Manage VM uptime
 
 on: #deactivate cron schedule in example code
   # # Schedule 1: Start VMs every day at 07:30 AM
