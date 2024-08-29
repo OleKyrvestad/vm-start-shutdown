@@ -8,19 +8,19 @@ on:
         description: 'VM name prefix to manage'
         required: true
       override_start:
-        description: Manual run, start VMs? (false/true)'
+        description: 'Manual run, start VMs? (false/true)'
         default: 'false'
         type: choice
         options:
           - 'true'
           - 'false'
       override_shutdown:
-          description: 'Manual run, shutdown VMs? (false/true)'
-          default: 'false'
-          type: choice
-          options:
-            - 'true'
-            - 'false'
+        description: 'Manual run, shutdown VMs? (false/true)'
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 env:
   AZURE_CLIENT_ID: ${{ vars.CLIENT_ID }}
@@ -41,7 +41,7 @@ jobs:
   start-vms:
     runs-on: ubuntu-latest
     needs: validate-overrides
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && github.event.inputs.override_start == 'true')
+    if: github.event.inputs.override_start == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
   stop-vms:
     runs-on: ubuntu-latest
     needs: validate-overrides
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_dispatch' && github.event.inputs.override_shutdown == 'true')
+    if: github.event.inputs.override_shutdown == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
