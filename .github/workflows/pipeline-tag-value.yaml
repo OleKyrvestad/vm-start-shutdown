@@ -1,0 +1,82 @@
+name: TAG - Manage VM uptime
+
+on:
+  # Schedule 1: Start VMs every day at 07:30 AM CEST (UTC+2)
+  schedule:
+    - cron: '30 5 * * *'  # 05:30 AM UTC
+  # Schedule 2: Stop VMs every day at 10:00 PM CEST (UTC+2)
+    - cron: '00 20 * * *'  # 08:00 PM UTC
+
+  # Manual trigger for both start and stop jobs
+  workflow_dispatch:
+    inputs:
+      vmTag:
+        description: 'Tag to query in the script'
+        required: true
+        default: 'vm-automation-start-stop'
+      vmTagValue:
+        description: 'Tag Value to query in the script'
+        required: true
+        default: 'true'
+      override_start:
+        description: 'Manual run, start VMs? (false/true)'
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      override_shutdown:
+        description: 'Manual run, shutdown VMs? (false/true)'
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+env:
+  AZURE_CLIENT_ID: ${{ vars.CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  AZURE_TENANT_ID: ${{ vars.TENANT_ID }}
+
+jobs:
+  validate-overrides:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for conflicting overrides
+        run: |
+          if [ "${{ github.event.inputs.override_start }}" == "true" ] && [ "${{ github.event.inputs.override_shutdown }}" == "true" ]; then
+            echo "Error: Both override_start and override_shutdown cannot be true at the same time."
+            exit 1
+          fi
+
+  start-vms:
+    runs-on: ubuntu-latest
+    needs: validate-overrides
+    if: (github.event_name == 'schedule' && github.event.schedule == '30 5 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.override_start == 'true')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: az login
+        run: az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+
+      - name: Start VMs with Tag '${{ github.event.inputs.vmTag }}' and value '${{ github.event.inputs.vmTagValue }}'
+        run: |
+          chmod +x ./vmTag-start.sh
+          ./vmTag-start.sh ${{ github.event.inputs.vmTag }} ${{ github.event.inputs.vmTagValue }}
+
+  stop-vms:
+    runs-on: ubuntu-latest
+    needs: validate-overrides
+    if: (github.event_name == 'schedule' && github.event.schedule == '00 20 * * *') || (github.event_name == 'workflow_dispatch' && github.event.inputs.override_shutdown == 'true')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: az login
+        run: az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+
+      - name: Stop VMs with Tag '${{ github.event.inputs.vmTag }}' and value '${{ github.event.inputs.vmTagValue }}'
+        run: |
+          chmod +x ./vmTag-shutdown.sh
+          ./vmTag-shutdown.sh ${{ github.event.inputs.vmTag }} ${{ github.event.inputs.vmTagValue }}
