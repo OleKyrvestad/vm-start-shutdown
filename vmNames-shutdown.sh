@@ -1,25 +1,34 @@
 #!/bin/bash
-##fix#########
-vmTag=$1       # The tag to check
-vmTagValue=$2  # The tag value to match
+
+vmNames=("$@")  # Capture all arguments as an array of VM names
 
 VM_IDS=()
 VM_NAMES=()
 
-# Check if vmTag is provided
-if [ -n "$vmTag" ] && [ -n "$vmTagValue" ]; then
-    echo "Processing VMs with tag: $vmTag=$vmTagValue"
+# Check if vmNames are provided
+if [ ${#vmNames[@]} -gt 0 ]; then
     
-    # Get the list of VMs with the specific tag and value
-    VM_IDS=$(az vm list --query "[?tags.$vmTag == '$vmTagValue'].id" -o tsv)
-    VM_NAMES=$(az vm list --query "[?tags.$vmTag == '$vmTagValue'].name" -o tsv)
+    # Loop through each VM name in the list
+    for vmName in "${vmNames[@]}"; do
+        # Get the VM ID and Name for each VM
+        ID=$(az vm list --query "[?name == '$vmName'].id" -o tsv)
+        NAME=$(az vm list --query "[?name == '$vmName'].name" -o tsv)
+
+        if [ -n "$ID" ]; then
+            # Append results to the arrays
+            VM_IDS+=("$ID")
+            VM_NAMES+=("$NAME")
+        else
+            echo "VM $vmName not found."
+        fi
+    done
 else
-    echo "Please provide both a tag and a tag value."
+    echo "Please provide VM name(s)."
     exit 1
 fi
 
 # Check if any VMs were found
-if [ -z "$VM_IDS" ]; then
+if [ ${#VM_IDS[@]} -eq 0 ]; then
     echo "No VMs found matching the criteria."
     exit 0
 fi
@@ -29,14 +38,14 @@ echo "List of VMs to process:"
 echo "$VM_NAMES" | sed 's/^/ - /'
 echo -e "\033[36mProcessing VMs, please wait...\033[0m"
 
-# Stop the VMs
-az vm deallocate --ids "$VM_IDS" &>/dev/null
+# Deallocate the VMs
+az vm deallocate --ids ${VM_IDS[@]} &>/dev/null
 
 # Initialize an array to keep track of VMs that are not deallocated
 FAILED_VMS=()
 
 # Check the provisioning state of each VM
-for VM_ID in $VM_IDS; do
+for VM_ID in "${VM_IDS[@]}"; do
     VM_NAME=$(az vm show --ids "$VM_ID" --query "name" -o tsv)
     VM_PROVISIONING_STATE=$(az vm get-instance-view --ids "$VM_ID" --query "instanceView.statuses[?code=='PowerState/deallocated'].displayStatus" -o tsv)
 
