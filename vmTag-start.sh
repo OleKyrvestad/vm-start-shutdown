@@ -1,15 +1,33 @@
 #!/bin/bash
 
-vmPrefix=$1  # Accept vmPrefix as a command-line argument
+vmTag=$1       # The tag to check
+vmTagValue=$2  # The tag value to match
 
-# Get the list of VMs where the name starts with "vm-dev"
-VM_IDS=$(az vm list --query "[?contains(name, '$vmPrefix')].id" -o tsv)
-VM_NAMES=$(az vm list --query "[?contains(name, '$vmPrefix')].name" -o tsv)
+VM_IDS=()
+VM_NAMES=()
 
-# List VM´s 
-echo "List of VMs to process"
+# Check if vmTag is provided
+if [ -n "$vmTag" ] && [ -n "$vmTagValue" ]; then
+    echo "Processing VMs with tag: $vmTag=$vmTagValue"
+    
+    # Get the list of VMs with the specific tag and value
+    VM_IDS=$(az vm list --query "[?tags.$vmTag == '$vmTagValue'].id" -o tsv)
+    VM_NAMES=$(az vm list --query "[?tags.$vmTag == '$vmTagValue'].name" -o tsv)
+else
+    echo "Please provide both a tag and a tag value."
+    exit 1
+fi
+
+# Check if any VMs were found
+if [ -z "$VM_IDS" ]; then
+    echo "No VMs found matching the criteria."
+    exit 0
+fi
+
+# List VMs to process
+echo "List of VMs to process:"
 echo "$VM_NAMES" | sed 's/^/ - /'
-echo -e "\033[36m Processing VM´s, please wait...\033[0m"
+echo -e "\033[36mProcessing VMs, please wait...\033[0m"
 
 # Start the VMs
 az vm start --ids "$VM_IDS" &>/dev/null
