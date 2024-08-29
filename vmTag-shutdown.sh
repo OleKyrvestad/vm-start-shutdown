@@ -11,8 +11,8 @@ if [ -n "$vmTag" ] && [ -n "$vmTagValue" ]; then
     echo "Processing VMs with tag: $vmTag=$vmTagValue"
     
     # Get the list of VMs with the specific tag and value
-    VM_IDS=$(az vm list --query "[?tags.$vmTag == '$vmTagValue'].id" -o tsv)
-    VM_NAMES=$(az vm list --query "[?tags.$vmTag == '$vmTagValue'].name" -o tsv)
+    VM_IDS=$(az vm list --query "[?tags.\"$vmTag\" == '$vmTagValue'].id" -o tsv)
+    VM_NAMES=$(az vm list --query "[?tags.\"$vmTag\" == '$vmTagValue'].name" -o tsv)
 else
     echo "Please provide both a tag and a tag value."
     exit 1

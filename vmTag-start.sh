@@ -6,9 +6,17 @@ vmTagValue=$2   # The tag value to match (e.g., true)
 VM_IDS=()
 VM_NAMES=()
 
-# Get the list of VMs with the specific tag and value
-VM_IDS=$(az vm list --query "[?tags.\`$vmTag\` == \`$vmTagValue\`].id" -o tsv)
-VM_NAMES=$(az vm list --query "[?tags.\`$vmTag\` == \`$vmTagValue\`].name" -o tsv)
+# Check if vmTag is provided
+if [ -n "$vmTag" ] && [ -n "$vmTagValue" ]; then
+    echo "Processing VMs with tag: $vmTag=$vmTagValue"
+    
+    # Get the list of VMs with the specific tag and value
+    VM_IDS=$(az vm list --query "[?tags.\"$vmTag\" == '$vmTagValue'].id" -o tsv)
+    VM_NAMES=$(az vm list --query "[?tags.\"$vmTag\" == '$vmTagValue'].name" -o tsv)
+else
+    echo "Please provide both a tag and a tag value."
+    exit 1
+fi
 
 # Check if any VMs were found
 if [ -z "$VM_IDS" ]; then
