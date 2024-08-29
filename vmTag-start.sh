@@ -7,8 +7,8 @@ VM_IDS=()
 VM_NAMES=()
 
 # Get the list of VMs with the specific tag and value
-VM_IDS=$(az vm list --query "[?tags.$vmTag=='$vmTagValue'].id" -o tsv)
-VM_NAMES=$(az vm list --query "[?tags.$vmTag=='$vmTagValue'].name" -o tsv)
+VM_IDS=$(az vm list --query "[?tags.\`$vmTag\` == \`$vmTagValue\`].id" -o tsv)
+VM_NAMES=$(az vm list --query "[?tags.\`$vmTag\` == \`$vmTagValue\`].name" -o tsv)
 
 # Check if any VMs were found
 if [ -z "$VM_IDS" ]; then
@@ -16,7 +16,6 @@ if [ -z "$VM_IDS" ]; then
     exit 0
 fi
 
-# List VMs to process
 # List VMs to process
 echo "List of VMs to process:"
 echo "$VM_NAMES" | sed 's/^/ - /'
