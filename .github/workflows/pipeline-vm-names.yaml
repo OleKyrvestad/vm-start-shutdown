@@ -36,6 +36,7 @@ jobs:
           if [ "${{ github.event.inputs.vm_start }}" == "true" ] && [ "${{ github.event.inputs.vm_shutdown }}" == "true" ]; then
             echo -e "\033[36m Error: Both vm_start and vm_shutdown cannot be true at the same time. \033[0m"
             exit 1
+          fi
 
   start-vms:
     runs-on: ubuntu-latest
