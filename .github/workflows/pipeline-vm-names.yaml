@@ -52,7 +52,7 @@ jobs:
       - name: Start VMs with file or override names
         run: |
           chmod +x ./vmNames-start.sh
-          ./vmNames-start.sh "${{ github.event.inputs.vmNames }}" || cat vm-list.txt
+          ./vmNames-start.sh "${{ github.event.inputs.vmNames }}"
 
   stop-vms:
     runs-on: ubuntu-latest
@@ -68,4 +68,4 @@ jobs:
       - name: Stop VMs with file or override names
         run: |
           chmod +x ./vmNames-shutdown.sh
-          ./vmNames-shutdown.sh "${{ github.event.inputs.vmNames }}" || cat vm-list.txt
+          ./vmNames-shutdown.sh "${{ github.event.inputs.vmNames }}"

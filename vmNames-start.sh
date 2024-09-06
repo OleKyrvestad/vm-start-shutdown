@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # If no arguments passed, read from vm-list.txt
-if [ $# -eq 0 ]; then
+if [ -z "$1" ]; then
     echo "No VM names provided, reading from vm-list.txt"
     vmNames=($(cat vm-list.txt))
 else
