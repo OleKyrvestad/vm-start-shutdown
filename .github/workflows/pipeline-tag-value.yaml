@@ -2,10 +2,10 @@ name: TAG - Manage VM uptime
 
 on:
   # Schedule 1: Start VMs every day at 07:30 AM CEST (UTC+2)
-  schedule:
-    - cron: '30 5 * * *'  # 05:30 AM UTC
-  # Schedule 2: Stop VMs every day at 10:00 PM CEST (UTC+2)
-    - cron: '00 20 * * *'  # 08:00 PM UTC
+  # schedule: ##not in use in example code
+  #   - cron: '30 5 * * *'  # 05:30 AM UTC
+  # # Schedule 2: Stop VMs every day at 10:00 PM CEST (UTC+2)
+  #   - cron: '00 20 * * *'  # 08:00 PM UTC
 
   # Manual trigger for both start and stop jobs
   workflow_dispatch:

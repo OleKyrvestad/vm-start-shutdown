@@ -5,17 +5,17 @@ on:
   workflow_dispatch:
     inputs:
       vmNames:
-        description: 'VM name prefix to manage'
-        required: true
-      override_start:
-        description: 'Manual run, start VMs? (false/true)'
+        description: 'VM name prefix to manage (overrides file input if provided)'
+        required: false  # optional, uses txt file as default in script
+      vm_start:
+        description: 'start VMs? (false/true)'
         default: 'false'
         type: choice
         options:
           - 'true'
           - 'false'
-      override_shutdown:
-        description: 'Manual run, shutdown VMs? (false/true)'
+      vm_shutdown:
+        description: 'shutdown VMs? (false/true)'
         default: 'false'
         type: choice
         options:
@@ -33,15 +33,15 @@ jobs:
     steps:
       - name: Check for conflicting overrides
         run: |
-          if [ "${{ github.event.inputs.override_start }}" == "true" ] && [ "${{ github.event.inputs.override_shutdown }}" == "true" ]; then
-            echo -e "\033[36m Error: Both override_start and override_shutdown cannot be true at the same time. \033[0m"
+          if [ "${{ github.event.inputs.vm_start }}" == "true" ] && [ "${{ github.event.inputs.vm_shutdown }}" == "true" ]; then
+            echo -e "\033[36m Error: Both vm_start and vm_shutdown cannot be true at the same time. \033[0m"
             exit 1
           fi
 
   start-vms:
     runs-on: ubuntu-latest
     needs: validate-overrides
-    if: github.event.inputs.override_start == 'true'
+    if: github.event.inputs.vm_start == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,15 +49,15 @@ jobs:
       - name: az login
         run: az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
 
-      - name: Start VMs that contain '${{ github.event.inputs.vmNames }}' in the name 
+      - name: Start VMs with file or override names
         run: |
-          chmod +x ./vmNames-start.sh  # Ensure your script is executable
-          ./vmNames-start.sh ${{ github.event.inputs.vmNames }}
+          chmod +x ./vmNames-start.sh
+          ./vmNames-start.sh "${{ github.event.inputs.vmNames }}"
 
   stop-vms:
     runs-on: ubuntu-latest
     needs: validate-overrides
-    if: github.event.inputs.override_shutdown == 'true'
+    if: github.event.inputs.vm_shutdown == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
       - name: az login
         run: az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
 
-      - name: Stop VMs that contain '${{ github.event.inputs.vmNames }}' in the name 
+      - name: Stop VMs with file or override names
         run: |
-          chmod +x ./vmNames-shutdown.sh  # Ensure your shutdown script is executable
-          ./vmNames-shutdown.sh ${{ github.event.inputs.vmNames }}
+          chmod +x ./vmNames-shutdown.sh
+          ./vmNames-shutdown.sh "${{ github.event.inputs.vmNames }}"

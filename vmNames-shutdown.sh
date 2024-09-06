@@ -1,6 +1,12 @@
 #!/bin/bash
 
-vmNames=("$@")  # Capture all arguments as an array of VM names
+# If no arguments passed, read from vm-list.txt
+if [ -z "$1" ]; then
+    echo "No VM names provided, reading from vm-list.txt"
+    mapfile -t vmNames < vm-list.txt  # Read all lines into the vmNames array
+else
+    vmNames=("$@")  # Use the provided VM names
+fi
 
 VM_IDS=()
 VM_NAMES=()
@@ -35,7 +41,9 @@ fi
 
 # List VMs to process
 echo "List of VMs to process:"
-echo "$VM_NAMES" | sed 's/^/ - /'
+for vmName in "${VM_NAMES[@]}"; do
+    echo " - $vmName"
+done
 echo -e "\033[36mProcessing VMs, please wait...\033[0m"
 
 # Deallocate the VMs
